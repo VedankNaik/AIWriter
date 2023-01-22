@@ -67,8 +67,9 @@ const Home = () => {
             ></input>
             <p className="note">
               Note: <a href="https://beta.openai.com/overview">OPENAI</a>{" "}
-              provides limited usage for free. Create and use your own api key
-              for this app.
+              provides limited usage for free. Create your account and generate
+              your own api key for this app{" "}
+              <a href="https://beta.openai.com/account/api-keys">here</a>.
             </p>
             <div className="prompt-buttons">
               <a className={"generate-button"} onClick={submitApiKey}>
