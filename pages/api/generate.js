@@ -1,10 +1,6 @@
 import { Configuration, OpenAIApi } from "openai";
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
-const openai = new OpenAIApi(configuration);
 
 const basePromptPrefix = `
 Write me a detailed table of contents for a blog post with the title below.
@@ -13,6 +9,11 @@ Title:
 `;
 
 const generateAction = async (req, res) => {
+  const configuration = new Configuration({
+    apiKey: req.body.submitKey,
+  });
+  
+  const openai = new OpenAIApi(configuration);
 
   const baseCompletion = await openai.createCompletion({
     model: "text-davinci-003",
