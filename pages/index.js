@@ -5,9 +5,9 @@ import buildspaceLogo from "../assets/buildspace-logo.png";
 
 const Home = () => {
   const [userInput, setUserInput] = useState("");
+  const [apiKey, setApiKey] = useState("");
   const [apiOutput, setApiOutput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [apiKey, setApiKey] = useState("");
   const [submitKey, setSubmitKey] = useState("");
 
   const onUserChangedText = (event) => {
@@ -19,31 +19,36 @@ const Home = () => {
   };
 
   const callGenerateEndpoint = async () => {
+    debugger;
     setIsGenerating(true);
+    if (!userInput) {
+      alert("Please enter your text");
+      setIsGenerating(false);
+      return;
+    }
+    if (!apiKey) {
+      alert("Please enter your OPENAI API Key");
+      setIsGenerating(false);
+      return;
+    }
 
     const response = await fetch("/api/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userInput, submitKey }),
+      body: JSON.stringify({ userInput, apiKey }),
     });
-
+    if (!response.ok) {
+      alert("Please check your API Key");
+      setIsGenerating(false);
+      return;
+    }
     const data = await response.json();
     const { output } = data;
 
     setApiOutput(`${output.text}`);
     setIsGenerating(false);
-  };
-
-  const submitApiKey = () => {
-    localStorage.setItem("apikey", apiKey);
-    setSubmitKey(localStorage.getItem("apikey"));
-  };
-
-  const changeApiKey = () => {
-    localStorage.removeItem("apikey");
-    setSubmitKey("");
   };
 
   useEffect(() => {
@@ -53,11 +58,26 @@ const Home = () => {
   return (
     <div className="root">
       <Head>
-        <title>GPT-3 Writer</title>
+        <title>AIWriter</title>
       </Head>
       <div className="container">
-        {!submitKey ? (
-          <div>
+        <>
+          <div className="header">
+            <div className="header-title">
+              <h1>AIWriter</h1>
+            </div>
+            <div className="header-subtitle">
+              <h2>insert your title below, app will do the rest.</h2>
+            </div>
+          </div>
+          <div className="prompt-container">
+            <textarea
+              placeholder="Start typing here"
+              className="prompt-box"
+              value={userInput}
+              onChange={onUserChangedText}
+              required
+            />
             <input
               placeholder="Enter OPENAI API KEY"
               className="prompt-box small"
@@ -66,72 +86,40 @@ const Home = () => {
               required
             ></input>
             <p className="note">
-              Note: <a href="https://beta.openai.com/overview">OPENAI</a>{" "}
-              provides limited usage for free. Create your account and generate
-              your own api key for this app{" "}
+              Create your account <a href="https://beta.openai.com">OPENAI</a>{" "}
+              account and generate your own API key for this app{" "}
               <a href="https://beta.openai.com/account/api-keys">here</a>.
             </p>
             <div className="prompt-buttons">
-              <a className={"generate-button"} onClick={submitApiKey}>
+              <a
+                className={
+                  isGenerating ? "generate-button loading" : "generate-button"
+                }
+                onClick={callGenerateEndpoint}
+              >
                 <div className="generate">
-                  <p>Submit</p>
+                  {isGenerating ? (
+                    <span className="loader"></span>
+                  ) : (
+                    <p>Generate</p>
+                  )}
                 </div>
               </a>
             </div>
-          </div>
-        ) : (
-          <>
-            <div>
-              <button onClick={changeApiKey} className="change-key">
-                Change key
-              </button>
-            </div>
-            <div className="header">
-              <div className="header-title">
-                <h1>amazing writer!</h1>
-              </div>
-              <div className="header-subtitle">
-                <h2>insert your title below, app will do the rest.</h2>
-              </div>
-            </div>
-            <div className="prompt-container">
-              <textarea
-                placeholder="start typing here"
-                className="prompt-box"
-                value={userInput}
-                onChange={onUserChangedText}
-              />
-              <div className="prompt-buttons">
-                <a
-                  className={
-                    isGenerating ? "generate-button loading" : "generate-button"
-                  }
-                  onClick={callGenerateEndpoint}
-                >
-                  <div className="generate">
-                    {isGenerating ? (
-                      <span className="loader"></span>
-                    ) : (
-                      <p>Generate</p>
-                    )}
-                  </div>
-                </a>
-              </div>
-              {apiOutput && (
-                <div className="output">
-                  <div className="output-header-container">
-                    <div className="output-header">
-                      <h3>Output</h3>
-                    </div>
-                  </div>
-                  <div className="output-content">
-                    <p>{apiOutput}</p>
+            {apiOutput && (
+              <div className="output">
+                <div className="output-header-container">
+                  <div className="output-header">
+                    <h3>Output</h3>
                   </div>
                 </div>
-              )}
-            </div>
-          </>
-        )}
+                <div className="output-content">
+                  <p>{apiOutput}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       </div>
       <div className="badge-container grow">
         <a
